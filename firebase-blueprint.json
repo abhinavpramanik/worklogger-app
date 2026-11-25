@@ -1,0 +1,244 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Employee, Admin, or Super Admin profile stored in Firestore.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "fullName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "employeeId": { "type": "string", "minLength": 2, "maxLength": 40, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "format": "email", "minLength": 3, "maxLength": 254 },
+        "role": { "type": "string", "enum": ["employee", "admin", "super_admin"] },
+        "accountStatus": { "type": "string", "enum": ["active", "inactive"] },
+        "department": { "type": "string", "maxLength": 80 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "fullName", "employeeId", "email", "role", "accountStatus", "createdAt", "updatedAt"]
+    },
+    "EmployeeIdIndex": {
+      "title": "EmployeeIdIndex",
+      "description": "Uniqueness index mapping normalized employeeId to Firebase Auth UID without exposing PII.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "employeeId": { "type": "string", "minLength": 2, "maxLength": 40, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "employeeId", "createdAt"]
+    },
+    "WorkLog": {
+      "title": "WorkLog",
+      "description": "Daily employee work log entry or auto-saved draft.",
+      "type": "object",
+      "properties": {
+        "employeeUid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "employeeName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "employeeId": { "type": "string", "minLength": 2, "maxLength": 40, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "date": { "type": "string", "minLength": 10, "maxLength": 10, "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "categoryId": { "type": "string", "maxLength": 128 },
+        "categoryName": { "type": "string", "maxLength": 80 },
+        "tasks": { "type": "string", "maxLength": 4000 },
+        "outcome": { "type": "string", "maxLength": 1000 },
+        "customOutcome": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["Not Started", "In Progress", "Completed", "Blocked", "On Hold"] },
+        "plannedMinutes": { "type": "number" },
+        "startTime": { "type": "string", "maxLength": 5 },
+        "endTime": { "type": "string", "maxLength": 5 },
+        "breakMinutes": { "type": "number" },
+        "actualMinutes": { "type": "number" },
+        "entryStatus": { "type": "string", "enum": ["Draft", "Submitted"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "submittedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "employeeUid",
+        "employeeName",
+        "employeeId",
+        "date",
+        "categoryId",
+        "categoryName",
+        "tasks",
+        "outcome",
+        "customOutcome",
+        "status",
+        "plannedMinutes",
+        "startTime",
+        "endTime",
+        "breakMinutes",
+        "actualMinutes",
+        "entryStatus",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserPreset": {
+      "title": "UserPreset",
+      "description": "User-defined separate personal preset for either a task or an outcome.",
+      "type": "object",
+      "properties": {
+        "employeeUid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "presetType": { "type": "string", "enum": ["task", "outcome"] },
+        "text": { "type": "string", "minLength": 1, "maxLength": 4000 },
+        "categoryName": { "type": "string", "maxLength": 80 },
+        "plannedMinutes": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["employeeUid", "presetType", "text", "categoryName", "plannedMinutes", "createdAt", "updatedAt"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Work log category.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "description": { "type": "string", "maxLength": 300 },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "description", "active", "createdAt", "updatedAt"]
+    },
+    "Holiday": {
+      "title": "Holiday",
+      "description": "Company, public, or special holiday configured by an admin.",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "minLength": 10, "maxLength": 10, "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "type": { "type": "string", "enum": ["Weekly Holiday", "Public Holiday", "Company Holiday", "Special Holiday"] },
+        "description": { "type": "string", "maxLength": 500 },
+        "active": { "type": "boolean" },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "name", "type", "description", "active", "createdBy", "createdAt", "updatedAt"]
+    },
+    "LeaveRequest": {
+      "title": "LeaveRequest",
+      "description": "Employee leave request with approval status.",
+      "type": "object",
+      "properties": {
+        "employeeUid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "employeeName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "employeeId": { "type": "string", "minLength": 2, "maxLength": 40, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "startDate": { "type": "string", "minLength": 10, "maxLength": 10, "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "endDate": { "type": "string", "minLength": 10, "maxLength": 10, "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "leaveType": { "type": "string", "enum": ["Casual Leave", "Sick Leave", "Earned Leave", "Personal Leave", "Unpaid Leave", "Other"] },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "supportingNote": { "type": "string", "maxLength": 1000 },
+        "status": { "type": "string", "enum": ["Pending", "Approved", "Rejected", "Withdrawn"] },
+        "adminComment": { "type": "string", "maxLength": 1000 },
+        "reviewedBy": { "type": "string", "maxLength": 128 },
+        "reviewedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "employeeUid",
+        "employeeName",
+        "employeeId",
+        "startDate",
+        "endDate",
+        "leaveType",
+        "reason",
+        "supportingNote",
+        "status",
+        "adminComment",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Immutable audit trail for work log edits.",
+      "type": "object",
+      "properties": {
+        "entityType": { "type": "string", "enum": ["workLog", "leaveRequest", "holiday", "category", "user", "settings"] },
+        "entityId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "employeeUid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "action": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "previousData": { "type": "object" },
+        "updatedData": { "type": "object" },
+        "changedBy": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "changedByName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["entityType", "entityId", "employeeUid", "action", "previousData", "updatedData", "changedBy", "changedByName", "timestamp"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "User-scoped in-app notifications.",
+      "type": "object",
+      "properties": {
+        "recipientUid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "message": { "type": "string", "minLength": 1, "maxLength": 600 },
+        "type": { "type": "string", "enum": ["review", "leave", "system"] },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["recipientUid", "title", "message", "type", "read", "createdAt"]
+    },
+    "AppSettings": {
+      "title": "AppSettings",
+      "description": "Organization-wide application settings managed by Super Admin.",
+      "type": "object",
+      "properties": {
+        "organizationName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "timezone": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "standardDailyMinutes": { "type": "number" },
+        "requireEmailVerification": { "type": "boolean" },
+        "updatedBy": { "type": "string", "maxLength": 128 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["organizationName", "timezone", "standardDailyMinutes", "requireEmailVerification", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profiles containing role and employee metadata."
+    },
+    "/employeeIdIndex/{empId}": {
+      "schema": { "$ref": "#/entities/EmployeeIdIndex" },
+      "description": "Unique employeeId reservation index."
+    },
+    "/workLogs/{logId}": {
+      "schema": { "$ref": "#/entities/WorkLog" },
+      "description": "Work log entries and drafts."
+    },
+    "/userPresets/{presetId}": {
+      "schema": { "$ref": "#/entities/UserPreset" },
+      "description": "User-defined task and outcome presets."
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Work categories."
+    },
+    "/holidays/{holidayId}": {
+      "schema": { "$ref": "#/entities/Holiday" },
+      "description": "Admin-managed holidays."
+    },
+    "/leaveRequests/{leaveId}": {
+      "schema": { "$ref": "#/entities/LeaveRequest" },
+      "description": "Employee leave requests and approvals."
+    },
+    "/auditLogs/{auditId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Immutable edit audit logs."
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "User notifications."
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/AppSettings" },
+      "description": "Global application settings."
+    }
+  }
+}

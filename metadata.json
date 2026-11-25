@@ -1,0 +1,6 @@
+{
+  "name": "WorkLog – Employee Work Log Management System",
+  "description": "Enterprise employee work log management, automatic draft saving, leave and holiday tracking, admin reviews, and formatted Excel/CSV reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
